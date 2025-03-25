@@ -8,7 +8,7 @@ import '../widgets/macro_tracker.dart';
 import '../widgets/water_tracker.dart';
 import '../widgets/meal_tracker.dart';
 
-class Nutrition extends StatelessWidget {
+class NutritionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final nutritionProvider = Provider.of<NutritionProvider>(context);

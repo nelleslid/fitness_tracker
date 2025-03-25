@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
-class Profile extends StatelessWidget {
+class StatisticsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profil'),
+        title: Text('Statistiken'),
         actions: [
           IconButton(
             icon: Icon(Icons.bar_chart),
             onPressed: () {
-              Navigator.pushNamed(context, '/statistics');
+              // Bereits auf der Statistik-Seite, keine Aktion nötig
             },
           ),
           IconButton(
@@ -31,7 +31,7 @@ class Profile extends StatelessWidget {
       ),
       body: Center(
         child: Text(
-          'Profil\nHier kannst du deine Daten und Einstellungen anpassen.',
+          'Statistiken\nHier siehst du deine Fortschritte.',
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 18),
         ),

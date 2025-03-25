@@ -1,24 +1,38 @@
+// lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+// Providers
 import 'providers/nutrition_provider.dart';
-import 'pages/nutrition.dart';
+import 'providers/workout_provider.dart';
+import 'providers/body_metrics_provider.dart';
+import 'providers/user_provider.dart';
+import 'providers/statistics_provider.dart';
+
+// Pages
 import 'pages/training.dart';
 import 'pages/statistics.dart';
 import 'pages/profile.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'pages/nutrition_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('de', null);
   await Supabase.initialize(
-    url: 'https://xdkinmufrapcszbmopyr.supabase.co',  // z. B. https://xyz.supabase.co
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhka2lubXVmcmFwY3N6Ym1vcHlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI4OTg3MzksImV4cCI6MjA1ODQ3NDczOX0.TEzllMgcDOeFnPwu7BjOQwofkueyp68bGuxRphTqGko',   // Dein API-Schlüssel
+    url: 'https://xdkinmufrapcszbmopyr.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhka2lubXVmcmFwY3N6Ym1vcHlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI4OTg3MzksImV4cCI6MjA1ODQ3NDczOX0.TEzllMgcDOeFnPwu7BjOQwofkueyp68bGuxRphTqGko',
   );
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => NutritionProvider()),
+        ChangeNotifierProvider(create: (_) => WorkoutProvider()),
+        ChangeNotifierProvider(create: (_) => BodyMetricsProvider()),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => StatisticsProvider()),
       ],
       child: MyApp(),
     ),
@@ -41,7 +55,7 @@ class MyApp extends StatelessWidget {
       ],
       home: HomeScreen(),
       routes: {
-        '/statistics': (context) => Statistics(),
+        '/statistics': (context) => StatisticsPage(),
       },
     );
   }
@@ -57,9 +71,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Liste der Seiten
   final List<Widget> _pages = [
-    Nutrition(),
-    Training(),
-    Profile(),
+    NutritionPage(),
+    TrainingPage(),
+    ProfilePage(),
   ];
 
   void _onItemTapped(int index) {
