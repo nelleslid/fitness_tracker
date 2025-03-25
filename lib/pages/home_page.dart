@@ -28,21 +28,24 @@ class _HomePageState extends State<HomePage> {
   }
   
   Future<void> _initializeProviders() async {
-    try {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final nutritionProvider = Provider.of<NutritionProvider>(context, listen: false);
-      final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
-      final bodyMetricsProvider = Provider.of<BodyMetricsProvider>(context, listen: false);
-      
-      await Future.wait([
-        userProvider.initialize(),
-        nutritionProvider.initialize(),
-        workoutProvider.initialize(),
-        bodyMetricsProvider.initialize(),
-      ]);
-    } catch (e) {
-      print("Error initializing providers: $e");
-      rethrow; // Rethrow to be caught by FutureBuilder
+  try {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    
+    // Initialize user provider first since others might depend on it
+    await userProvider.initialize();
+    
+    // Then initialize other providers sequentially not in parallel
+    final nutritionProvider = Provider.of<NutritionProvider>(context, listen: false);
+    await nutritionProvider.initialize();
+    
+    final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
+    await workoutProvider.initialize();
+    
+    final bodyMetricsProvider = Provider.of<BodyMetricsProvider>(context, listen: false);
+    await bodyMetricsProvider.initialize();
+  } catch (e) {
+    print("Error initializing providers: $e");
+      // Don't rethrow - handle gracefully
     }
   }
 

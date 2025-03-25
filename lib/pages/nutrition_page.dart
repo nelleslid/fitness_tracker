@@ -1,4 +1,5 @@
 // lib/pages/nutrition_page.dart
+import 'package:fitness_app/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/nutrition_provider.dart';
@@ -12,11 +13,12 @@ class NutritionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final nutritionProvider = Provider.of<NutritionProvider>(context);
-    final user = User(
-      calorieGoal: 3100,
-      macroGoals: {'carbs': 366, 'protein': 366, 'fat': 366},
-      waterGoal: 3.6,
-    );
+    final userProvider = Provider.of<UserProvider>(context);
+    final user = userProvider.user;
+    
+    final calorieGoal = 3100;
+    final macroGoals = {'carbs': 366, 'protein': 366, 'fat': 366};
+    final waterGoal = 3.6;
 
     // We're no longer using an AppBar here since it's handled by HomePage
     return SingleChildScrollView(

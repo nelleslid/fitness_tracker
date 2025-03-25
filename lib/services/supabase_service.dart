@@ -52,14 +52,27 @@ class SupabaseService {
 
     final dateString = date.toIso8601String().split('T')[0];
 
-    final data = await supabase
-        .from('nutrition')
-        .select()
-        .eq('user_id', userId)
-        .eq('date', dateString)
-        .maybeSingle();
-
-    return data;
+    try {
+      final data = await supabase
+          .from('nutrition')
+          .select()
+          .eq('user_id', userId)
+          .eq('date', dateString)
+          .maybeSingle();
+      return data;
+    } catch (e) {
+      print('Error fetching nutrition data: $e');
+      // Return empty data instead of null to avoid null checks
+      return {
+        'used_calories': 0,
+        'bonus_calories': 0,
+        'carbs': 0.0,
+        'protein': 0.0,
+        'fat': 0.0,
+        'water': 0.0,
+        'meals': {}
+      };
+    }
   }
 
   // Methoden für Trainingsdaten

@@ -28,6 +28,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
     });
   }
 
+  // In AuthWrapper
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<bool>(
@@ -36,30 +37,17 @@ class _AuthWrapperState extends State<AuthWrapper> {
         return user != null;
       }),
       builder: (context, snapshot) {
-        // Show loading indicator while checking auth state
+        // Don't use addPostFrameCallback here - it's causing double navigation
         if (!snapshot.hasData) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
-
-        // Navigate based on auth state
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (snapshot.data!) {
-            Navigator.of(context).pushReplacementNamed('/home');
-          } else {
-            Navigator.of(context).pushReplacementNamed('/login');
-          }
-        });
-
-        // Return loading screen while navigation is in progress
-        return const Scaffold(
-          body: Center(
-            child: CircularProgressIndicator(),
-          ),
-        );
+        
+        // Replace this with direct return of pages
+        if (snapshot.data!) {
+          return HomePage();  // Direct return instead of navigation
+        } else {
+          return LoginPage();  // Direct return instead of navigation
+        }
       },
     );
   }
