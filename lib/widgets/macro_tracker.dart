@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 class MacroTracker extends StatelessWidget {
   final User user;
 
-  MacroTracker({required this.user});
+  const MacroTracker({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -15,6 +15,13 @@ class MacroTracker extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Gleichmäßiger Abstand zwischen den Makros
       children: user.macroGoals.keys.map((macro) {
+        // Sichere Zugriffe auf die Werte
+        final currentMacro = entry.macros[macro] ?? 0.0;
+        final goalMacro = user.macroGoals[macro] ?? 0.0;
+        
+        // Verhindere Division durch 0
+        final progress = goalMacro > 0 ? (currentMacro / goalMacro).clamp(0.0, 1.0) : 0.0;
+
         return Expanded(
           flex: 1, // Jeder Makro-Balken nimmt 1/3 der Breite ein
           child: Padding(
@@ -23,14 +30,14 @@ class MacroTracker extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  '$macro ${entry.macros[macro]!.toInt()} / ${user.macroGoals[macro]!.toInt()} g',
-                  style: TextStyle(fontSize: 12),
+                  '$macro ${currentMacro.toInt()} / ${goalMacro.toInt()} g',
+                  style: const TextStyle(fontSize: 12),
                 ),
-                SizedBox(height: 10), // Kleiner Abstand zwischen Text und Balken
+                const SizedBox(height: 10), // Kleiner Abstand zwischen Text und Balken
                 LinearProgressIndicator(
-                  value: entry.macros[macro]! / user.macroGoals[macro]!,
+                  value: progress,
                   backgroundColor: Colors.grey[300],
-                  valueColor: AlwaysStoppedAnimation(Colors.black),
+                  valueColor: const AlwaysStoppedAnimation(Colors.black),
                   minHeight: 5, // Etwas dickerer Balken
                 ),
               ],

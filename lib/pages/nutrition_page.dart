@@ -1,5 +1,5 @@
+// lib/pages/nutrition_page.dart
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../providers/nutrition_provider.dart';
 import '../models/user.dart';
@@ -18,51 +18,23 @@ class NutritionPage extends StatelessWidget {
       waterGoal: 3.6,
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          DateFormat('EEEE', 'de').format(nutritionProvider.selectedDate),
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.grey[50],
-        actions: [
-          IconButton(
-            icon: Icon(Icons.bar_chart),
-            onPressed: () {
-              // Navigiere zur Statistik-Seite
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.calendar_today),
-            onPressed: () async {
-              DateTime? picked = await showDatePicker(
-                context: context,
-                initialDate: nutritionProvider.selectedDate,
-                firstDate: DateTime(2020),
-                lastDate: DateTime.now(),
-              );
-              if (picked != null) nutritionProvider.setDate(picked);
-            },
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 30),
-              CalorieTracker(user: user),
-              SizedBox(height: 60),
-              MacroTracker(user: user),
-              SizedBox(height: 60),
-              WaterTracker(user: user),
-              SizedBox(height: 60),
-              MealTracker(),
-              SizedBox(height: 60),
-            ],
-          ),
+    // We're no longer using an AppBar here since it's handled by HomePage
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 8),
+            CalorieTracker(user: user),
+            SizedBox(height: 40),
+            MacroTracker(user: user),
+            SizedBox(height: 40),
+            WaterTracker(user: user),
+            SizedBox(height: 40),
+            MealTracker(),
+            SizedBox(height: 40),
+          ],
         ),
       ),
     );

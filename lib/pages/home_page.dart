@@ -1,13 +1,15 @@
-// lib/pages/home_screen.dart
+// lib/pages/home_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'nutrition.dart';
-import 'training.dart';
-import 'profile.dart';
+import 'nutrition_page.dart';
+import 'training_page.dart';
+import 'profile_page.dart';
+import 'statistics_page.dart';
 import '../providers/nutrition_provider.dart';
 import '../providers/workout_provider.dart';
 import '../providers/body_metrics_provider.dart';
 import '../providers/user_provider.dart';
+import '../widgets/custom_app_bar.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -16,27 +18,33 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
+  DateTime _selectedDate = DateTime.now();
+  late Future<void> _initializationFuture;
   
   @override
   void initState() {
     super.initState();
-    // Provider initialisieren, wenn der HomeScreen geladen wird
-    Future.microtask(() => _initializeProviders());
+    _initializationFuture = _initializeProviders();
   }
   
   Future<void> _initializeProviders() async {
-    await Provider.of<UserProvider>(context, listen: false).initialize();
-    await Provider.of<NutritionProvider>(context, listen: false).initialize();
-    await Provider.of<WorkoutProvider>(context, listen: false).initialize();
-    await Provider.of<BodyMetricsProvider>(context, listen: false).initialize();
+    try {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final nutritionProvider = Provider.of<NutritionProvider>(context, listen: false);
+      final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
+      final bodyMetricsProvider = Provider.of<BodyMetricsProvider>(context, listen: false);
+      
+      await Future.wait([
+        userProvider.initialize(),
+        nutritionProvider.initialize(),
+        workoutProvider.initialize(),
+        bodyMetricsProvider.initialize(),
+      ]);
+    } catch (e) {
+      print("Error initializing providers: $e");
+      rethrow; // Rethrow to be caught by FutureBuilder
+    }
   }
-
-  // Liste der Seiten
-  final List<Widget> _pages = [
-    NutritionPage(),
-    TrainingPage(),
-    ProfilePage(),
-  ];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -44,28 +52,99 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  Future<void> _selectDate() async {
+    DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+      locale: const Locale('de', 'DE'),
+    );
+    
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+      });
+      
+      // Update providers with the new date
+      try {
+        if (_selectedIndex == 0) {
+          Provider.of<NutritionProvider>(context, listen: false).setDate(picked);
+        } else if (_selectedIndex == 1) {
+          Provider.of<WorkoutProvider>(context, listen: false).setDate(picked);
+        }
+      } catch (e) {
+        print("Error updating date: $e");
+      }
+    }
+  }
+
+  void _navigateToStatistics() {
+    Navigator.pushNamed(context, '/statistics');
+  }
+
+  // Get the appropriate page based on the selected index
+  Widget _getPage() {
+    switch (_selectedIndex) {
+      case 0:
+        return NutritionPage();
+      case 1:
+        return TrainingPage();
+      case 2:
+        return ProfilePage();
+      default:
+        return NutritionPage();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.fastfood),
-            label: 'Ernährung',
+    return FutureBuilder(
+      future: _initializationFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+        
+        if (snapshot.hasError) {
+          return Scaffold(
+            body: Center(
+              child: Text('Error: ${snapshot.error}'),
+            ),
+          );
+        }
+        
+        return Scaffold(
+          appBar: CustomAppBar(
+            selectedDate: _selectedDate,
+            onCalendarTap: _selectDate,
+            onStatsTap: _navigateToStatistics,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.fitness_center),
-            label: 'Training',
+          body: _getPage(),
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.fastfood),
+                label: 'Ernährung',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.fitness_center),
+                label: 'Training',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person),
+                label: 'Profil',
+              ),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profil',
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

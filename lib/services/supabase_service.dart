@@ -7,8 +7,16 @@ class SupabaseService {
   factory SupabaseService() => _instance;
   SupabaseService._internal();
 
-  // Referenz zum Supabase-Client
-  final supabase = Supabase.instance.client;
+  // Getter für den Supabase-Client
+  SupabaseClient get supabase => Supabase.instance.client;
+
+  // Initialisierungsmethode
+  static Future<void> initialize() async {
+    await Supabase.initialize(
+      url: 'https://xdkinmufrapcszbmopyr.supabase.co',
+      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhka2lubXVmcmFwY3N6Ym1vcHlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI4OTg3MzksImV4cCI6MjA1ODQ3NDczOX0.TEzllMgcDOeFnPwu7BjOQwofkueyp68bGuxRphTqGko',
+    );
+  }
 
   // Benutzer-Authentifizierung
   User? get currentUser => supabase.auth.currentUser;

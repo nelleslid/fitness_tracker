@@ -16,7 +16,9 @@ class _LoginPageState extends State<LoginPage> {
   String? _errorMessage;
 
   Future<void> _signIn() async {
-    if (!_formKey.currentState!.validate()) return;
+    final formState = _formKey.currentState;
+    if (formState == null) return;
+    if (!formState.validate()) return;
 
     setState(() {
       _isLoading = true;
@@ -29,6 +31,7 @@ class _LoginPageState extends State<LoginPage> {
         password: _passwordController.text,
       );
 
+      if (!mounted) return;
       Navigator.of(context).pushReplacementNamed('/home');
     } on AuthException catch (e) {
       setState(() {
@@ -39,9 +42,11 @@ class _LoginPageState extends State<LoginPage> {
         _errorMessage = 'Ein Fehler ist aufgetreten: $e';
       });
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
