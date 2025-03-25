@@ -1,10 +1,9 @@
+// lib/pages/auth/login_page.dart
 import 'package:flutter/material.dart';
-import '../services/supabase_service.dart';
-// Andere nötige Imports...
+import '../../../services/supabase_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
-
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -16,13 +15,6 @@ class _LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
   String? _errorMessage;
 
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
   Future<void> _signIn() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -32,25 +24,24 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      await SupabaseService().signIn(
+      await Supabase.instance.client.auth.signInWithPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
-      
-      if (!mounted) return;
-      
-      // Nach erfolgreicher Anmeldung zur Hauptseite navigieren
+
       Navigator.of(context).pushReplacementNamed('/home');
+    } on AuthException catch (e) {
+      setState(() {
+        _errorMessage = e.message;
+      });
     } catch (e) {
       setState(() {
-        _errorMessage = 'Anmeldung fehlgeschlagen: ${e.toString()}';
+        _errorMessage = 'Ein Fehler ist aufgetreten: $e';
       });
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -58,72 +49,56 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Anmelden'),
+        title: Text('Anmelden'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextFormField(
                 controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'E-Mail',
-                  border: OutlineInputBorder(),
-                ),
+                decoration: InputDecoration(labelText: 'E-Mail'),
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Bitte geben Sie Ihre E-Mail-Adresse ein';
-                  }
-                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                    return 'Bitte geben Sie eine gültige E-Mail-Adresse ein';
+                    return 'Bitte gib deine E-Mail ein';
                   }
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               TextFormField(
                 controller: _passwordController,
-                decoration: const InputDecoration(
-                  labelText: 'Passwort',
-                  border: OutlineInputBorder(),
-                ),
+                decoration: InputDecoration(labelText: 'Passwort'),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Bitte geben Sie Ihr Passwort ein';
-                  }
-                  if (value.length < 6) {
-                    return 'Passwort muss mindestens 6 Zeichen lang sein';
+                    return 'Bitte gib dein Passwort ein';
                   }
                   return null;
                 },
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               if (_errorMessage != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
-                  child: Text(
-                    _errorMessage!,
-                    style: const TextStyle(color: Colors.red),
-                  ),
+                Text(
+                  _errorMessage!,
+                  style: TextStyle(color: Colors.red),
                 ),
+              SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _isLoading ? null : _signIn,
-                child: _isLoading
-                    ? const CircularProgressIndicator()
-                    : const Text('Anmelden'),
+                child: _isLoading 
+                    ? CircularProgressIndicator(color: Colors.white)
+                    : Text('Anmelden'),
               ),
-              const SizedBox(height: 16),
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pushNamed('/register');
+                  Navigator.pushNamed(context, '/register');
                 },
-                child: const Text('Noch kein Konto? Registrieren'),
+                child: Text('Noch kein Konto? Registrieren'),
               ),
             ],
           ),
